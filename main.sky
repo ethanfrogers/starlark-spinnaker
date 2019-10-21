@@ -1,0 +1,25 @@
+load('//config/spinnaker/v1/spinnaker.sky', 'spinnaker')
+
+def main(ctx):
+    return spinnaker.pipeline(
+        name='Deploy to Production',
+        triggers=[
+            spinnaker.triggers.github('armory-io/terraformer', 'master')
+        ],
+        stages=[
+            spinnaker.stages.bake_manifest(
+                notifications=[
+                    spinnaker.notification.slack(
+                        address='#devops',
+                        when=[spinnaker.notification.when('complete')]
+                    )
+                ]
+            ),
+            spinnaker.stages.parallel(
+                stages=[
+                    spinnaker.stages.deploy_manifest(),
+                    spinnaker.stages.deploy_manifest(),
+                ]
+            )
+        ]
+    )

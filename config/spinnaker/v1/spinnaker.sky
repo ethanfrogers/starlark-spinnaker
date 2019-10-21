@@ -1,0 +1,45 @@
+def _pipeline(name, keepWaitingPipeline=False, limitConcurrent=True, stages=[], triggers=[]):
+    return {
+        'name': name,
+        'keepWaitingPipeline': keepWaitingPipeline,
+        'limitConcurrent': limitConcurrent,
+        'stages': stages,
+        'triggers': triggers,
+    }
+
+
+
+def _trigger_github(repo, branch, enabled=true):
+    parts = repo.split('/')
+    return {
+        'enabled': enabled,
+        'branch': branch,
+        'project': parts[0],
+        'slug': parts[1],
+        'source': 'github',
+        'type': 'git',
+    }
+
+def _notification_when(action) {
+    return {
+        'complete': 'stage.complete'
+    }[action]
+}
+
+def _notification_slack(channel, when=[], level='stage')
+    return {
+        'type': 'slack',
+        'address': channel,
+        'when': when,
+        'level': level
+    }
+
+spinnaker = struct(
+    pipeline = _pipeline
+    triggers = struct(
+        github = _trigger_github
+    ),
+    notifications = struct(
+        when = _notification_when
+    )
+)
