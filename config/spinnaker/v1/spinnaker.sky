@@ -1,5 +1,6 @@
-def _pipeline(name, keepWaitingPipeline=False, limitConcurrent=True, stages=[], triggers=[]):
+def _pipeline(name, application, keepWaitingPipeline=False, limitConcurrent=True, stages=[], triggers=[]):
     return {
+        'application': application,
         'name': name,
         'keepWaitingPipeline': keepWaitingPipeline,
         'limitConcurrent': limitConcurrent,
