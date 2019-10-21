@@ -1,0 +1,38 @@
+load('//config/spinnaker/v1/spinnaker.sky', 'spinnaker')
+
+
+def slack_notification(when = []):
+    return spinnaker.notifications.slack(
+        channel = '#devops',
+        when = when
+    )
+
+def main():
+    return spinnaker.pipeline(
+        name='Deploy to Production',
+        triggers=[
+            spinnaker.triggers.jenkins(
+                master = 'armory',
+                job = 'armory-io/terraformer',
+                propertyFile = 'build.properties'
+            )
+        ],
+        stages=[
+            spinnaker.stages.wait(
+                name = 'wait for something',
+                waitTime = 30,
+                refId = 0,
+                notifications = [slack_notification(
+                    when = [spinnaker.notifications.when('complete')]
+                )]
+            ),
+            spinnaker.stages.manual_judgement(
+                name = 'someone has to approve',
+                refId = 1,
+                requisiteStageRefIds = [0],
+                notifications = [slack_notification(
+                    when = [spinnaker.notifications.manual_judgement_when('waiting')]
+                )]
+            )
+        ]
+    )

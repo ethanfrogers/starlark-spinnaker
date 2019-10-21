@@ -7,9 +7,8 @@ def _pipeline(name, keepWaitingPipeline=False, limitConcurrent=True, stages=[], 
         'triggers': triggers,
     }
 
-
-
-def _trigger_github(repo, branch, enabled=true):
+# triggers
+def _trigger_github(repo, branch, enabled=True):
     parts = repo.split('/')
     return {
         'enabled': enabled,
@@ -20,13 +19,37 @@ def _trigger_github(repo, branch, enabled=true):
         'type': 'git',
     }
 
-def _notification_when(action) {
+def _trigger_cron(cronExpression, enabled = True):
+    return {
+        'cronExpression': cronExpression,
+        'enabled': enabled,
+        'type': 'cron'
+    }
+
+def _trigger_jenkins(master, job, propertyFile = '', enabled = True):
+    return {
+        'type': 'jenkins',
+        'enabled': enabled,
+        'propertyFile': propertyFile,
+        'master': master,
+        'job': job
+    }
+
+# notifications
+def _notification_when(action):
     return {
         'complete': 'stage.complete'
     }[action]
-}
 
-def _notification_slack(channel, when=[], level='stage')
+def _notification_manual_judgement_when(action):
+    return {
+        'waiting': 'manualJudgment',
+        'continue': 'manualJudgmentContinue',
+        'stop': 'manualJudgmentStop'
+    }[action]
+
+
+def _notification_slack(channel, when=[], level='stage'):
     return {
         'type': 'slack',
         'address': channel,
@@ -34,12 +57,50 @@ def _notification_slack(channel, when=[], level='stage')
         'level': level
     }
 
+
+# stages
+def _stage_wait(name, refId, waitTime = 30, notifications = [], requisiteStageRefIds = []):
+    return {
+        'name': name,
+        'type': 'wait',
+        'waitTime': waitTime,
+        'sendNotifications': should_send_notifications(notifications),
+        'notifications': notifications,
+        'refId': refId,
+        'requisiteStageRefIds': requisiteStageRefIds,
+    }
+
+def _stage_manual_judgement(name, refId, instructions='', judgement_inputs=[], requisiteStageRefIds = [], notifications = []):
+    return {
+        'name': name,
+        'type': 'manualJudgment',
+        'instructions': instructions,
+        'judgementInputs': judgement_inputs,
+        'sendNotifications': should_send_notifications(notifications),
+        'notifications': notifications,
+        'refId': refId,
+        'requisiteStageRefIds': requisiteStageRefIds
+    }
+
+def should_send_notifications(notifications = []):
+    return len(notifications) > 0
+
+# main module export
+# users should import this when calling load
 spinnaker = struct(
-    pipeline = _pipeline
+    pipeline = _pipeline,
     triggers = struct(
-        github = _trigger_github
+        github = _trigger_github,
+        cron = _trigger_cron,
+        jenkins = _trigger_jenkins
     ),
     notifications = struct(
-        when = _notification_when
+        when = _notification_when,
+        manual_judgement_when = _notification_manual_judgement_when,
+        slack = _notification_slack
+    ),
+    stages = struct(
+        wait = _stage_wait,
+        manual_judgement = _stage_manual_judgement
     )
 )
