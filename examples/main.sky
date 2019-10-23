@@ -1,7 +1,5 @@
 load("//config/spinnaker/v1/spinnaker.sky", "spinnaker")
 
-
-
 def slack_notification(when = []):
     return spinnaker.notifications.slack(
         channel = "#devops",
@@ -15,8 +13,8 @@ def environments_list():
 
 def main():
     return spinnaker.pipeline(
-        application = 'terraformer',
-        name = "Deploy to Production",
+        application = 'kustomize',
+        name = "Starlark Demo",
         parameters = [
             spinnaker.parameter(
                 name = 'namespace',
@@ -56,6 +54,6 @@ def main():
                 notifications = [slack_notification(
                     when = [spinnaker.notifications.manual_judgement_when("waiting")],
                 )],
-            )
+            ),
         ]
     )

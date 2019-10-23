@@ -1,0 +1,12 @@
+def main():
+    return {
+        'application': 'myapp',
+        'name': 'Deploy to Prod',
+        'stages': [
+            {
+                'type': 'wait',
+                'waitTime': 30,
+                'refId': 0,
+            }
+        ]
+    }
